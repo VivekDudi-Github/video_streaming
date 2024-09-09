@@ -2,10 +2,10 @@ import {mongoose , Schema} from "mongoose";
 import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 
-const video_Schema  = new Schema({
-    videofile : {
+const video_Schema  = new Schema({  
+    videofile : { 
         type : true , 
-        required : [true , 'Please upload a valid file'] ,
+        required : [true , 'Please upload a valid file for upload'] ,
     } , 
     thumbnail : {
         type : String  , 
