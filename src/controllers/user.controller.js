@@ -1,5 +1,6 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiErrors.js";
+import { ApiResponse } from "../utils/apiRes.js";
 import { User } from "../models/user.model.js";
 import { uploadToCloudinary } from "../utils/cloudinary.js";
 
@@ -42,9 +43,36 @@ const registerUser = asyncHandler( async(req , res) => {
     if( !avtar_localpath){
         throw new ApiError(400 , "Please upload your avatar")
     }
+
+
+    const avatar = await uploadToCloudinary(avtar_localpath)
+    const coverImage = await uploadToCloudinary(coveeerimage_localpath)
+ 
+    if ( !avatar) {
+        throw new ApiError(400 , "Please upload your avatar")
+    }
+
+    const user = await User.create({
+        fullname , 
+        password ,
+        avatar : avatar.url ,
+        coverImage : coverImage?.url || '' , 
+        email , 
+        username : username.toLowercase()
+    })
     
+    const userRef = await User.findById(user._id).select(
+        " -refreshToken"
+    )
 
-
+    if( !userRef ){
+        throw new ApiError(500 , "Something went while registring a user ");
+        
+    }
+//try both status
+    return res.status(201).json(
+        new ApiResponse(200 , userRef , "user registered successfully" )
+    )
 
 
 })

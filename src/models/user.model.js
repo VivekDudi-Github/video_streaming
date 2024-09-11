@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from "bcrypt"
 
 
-const user_Schema  = new Schema({ 
+const user_Schema  = new Schema({  
     username : {
         type : String , 
         required : true  , 
@@ -31,13 +31,10 @@ const user_Schema  = new Schema({
     } , 
     avatar : {
         type : String , 
-        unique : true , 
         required : true ,
     } , 
     coverImage : {
         type : String , 
-        unique : true , 
-        required : true ,
     } , 
     watchHistory : [{
         type : Schema.Types.ObjectId , 
