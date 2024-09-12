@@ -19,16 +19,14 @@ const user_Schema  = new Schema({
         required : true , 
     } , 
     fullname : {
-        type : Text , 
+        type : String , 
         required : true , 
         index : true , 
     } ,
     password : {
         type : String , 
-        unique : true , 
-        required : [true , 'Password is required'] ,
-
-    } , 
+        required : true , 
+    } ,
     avatar : {
         type : String , 
         required : true ,

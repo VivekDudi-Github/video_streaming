@@ -7,73 +7,88 @@ import { uploadToCloudinary } from "../utils/cloudinary.js";
 
 const registerUser = asyncHandler( async(req , res) => {
 
-
-//if else to validate wheter data is correct 
-//check if the user is already register 
-//if correct : do try upload the data and provide a response 
-// // if catch provide a response regarding the issue :  primiarly internal error 
-
-//if incorrect : do send a response regarding the data isn't right 
-
-
  const {fullname , username , email , password}=req.body
-    console.log(email , password)
+console.log(req.body);
+
 
     if (
         [fullname , email  ,username , password].some( (field) => field?.trim() == "" )
     ) {
         throw new ApiError(400 , "All fields are required");
     }
+    const existedUserEmail = await User.findOne({email})
+    const existedUserusername = await User.findOne({username})
     
-    const existedUserEmail = User.findOne(email)
-    const existedUserusername = User.findOne(username)
     
-
+ 
     if(existedUserEmail){
-        throw new ApiError(409 , "User with same email already exists already exists")
+        throw new ApiError(409 , "User with same email already exists ")
     }
     if(existedUserusername){
-        throw new ApiError(409 , "User with same username already exists already exists")
+        throw new ApiError(409 , "User with same username already exists ")
+    }
+    console.log('checked users');
+    
+    let avatar_localpath ;
+    // const coverimage_localpath = req.files?.coverImage[0]?.path 
+    
+    if( req.files && req.files?.avatar?.length > 0 ){
+        avatar_localpath = req.files.avatar[0].path
+    }else{
+        throw new ApiError(400 , "Avatar not found please checkk your files")
     }
 
 
-    const avtar_localpath = req.files?.avatar[0]?.path
-    const coveeerimage_localpath = req.files?.coverImage[0]?.path
+    let coverimage_localpath ;
+    let coverFileResponse ;
 
-    if( !avtar_localpath){
+    if( req?.files && req?.files?.coverImage?.length > 0 ){
+        coverFileResponse = null
+        coverimage_localpath = req.files.coverImage[0].path
+
+    }else{
+        coverFileResponse = "coverImage file wasn't uploaded "
+        coverimage_localpath = ''
+    }
+    
+    if( !avatar_localpath){
         throw new ApiError(400 , "Please upload your avatar")
     }
 
-
-    const avatar = await uploadToCloudinary(avtar_localpath)
-    const coverImage = await uploadToCloudinary(coveeerimage_localpath)
+    
+    const avatar = await uploadToCloudinary(avatar_localpath)
+    const coverImage = await uploadToCloudinary(coverimage_localpath)
  
     if ( !avatar) {
         throw new ApiError(400 , "Please upload your avatar")
-    }
-
+   }
+    console.log("uploaded");
+    
     const user = await User.create({
         fullname , 
         password ,
-        avatar : avatar.url ,
+        avatar : avatar.url  ,
         coverImage : coverImage?.url || '' , 
         email , 
-        username : username.toLowercase()
+        username : username.toLowerCase() , 
     })
     
+     
     const userRef = await User.findById(user._id).select(
-        " -refreshToken"
+        "-password -refreshToken"
     )
 
     if( !userRef ){
         throw new ApiError(500 , "Something went while registring a user ");
         
     }
-//try both status
-    return res.status(201).json(
-        new ApiResponse(200 , userRef , "user registered successfully" )
-    )
+    
 
+    return res.status(201).json(
+        new ApiResponse(200 , userRef , 
+            ("operation completed succesfully " + coverFileResponse)
+         )
+    )
 
 })
 //create and add validation for email 
