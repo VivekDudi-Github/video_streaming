@@ -32,11 +32,14 @@ console.log(req.body);
     
     let avatar_localpath ;
     // const coverimage_localpath = req.files?.coverImage[0]?.path 
+    console.log(req.files );
     
-    if( req.files && req.files?.avatar?.length > 0 ){
-        avatar_localpath = req.files.avatar[0].path
+
+    if( req?.files && Array.isArray(req.files.avatar) && req?.files?.avatar?.length > 0 ){
+        avatar_localpath = req.files.avatar[0].path ; 
+        
     }else{
-        throw new ApiError(400 , "Avatar not found please checkk your files")
+        throw new ApiError(400 , "Avatar not found please check your files")
     }
 
 
@@ -94,11 +97,13 @@ console.log(req.body);
 })
 
 
-
+//generate tokens
 const generateAccessAndRefreshToken = async(userId) => {
     try {
         const user = await User.findById(userId)
+        
         const accessToken = user.generateAccessToken()
+        
         const refreshToken = user.generateRefreshToken()  
         
         user.refreshToken = refreshToken
@@ -119,22 +124,18 @@ const generateAccessAndRefreshToken = async(userId) => {
 const loginUser = asyncHandler( async(req, res) => {
 
 //get email/username and password and validate them 
-// check if the user exists or not in database
-// if not then send error response and if yes continue 
-/// do pass check
-///  generate & send access and refresh token
-///   send cookies 
-//    find same user , retrieve it's data and provide the user iD and required responses 
+    
 
    const {email , username , password} = req.body
-    if(!username || !email){
+     if(!(username || email)){ 
         throw new ApiError(400 , "atleast username or email is required")
     }
 
 
     const user = await User.findOne({
         $or:[{username} ,{email} ] 
-    }).select("-password -refreshToken")
+    }).select(" -refreshToken")
+
 
     if (!user) {
         throw new ApiError(404 , "user does not exists "); 
@@ -144,35 +145,65 @@ const loginUser = asyncHandler( async(req, res) => {
     const IsPassValid = await user.isPasswordCorrect(password)
     
     if(!IsPassValid){
+        
         throw new ApiError(401 , "Password was incorrect"); 
     }
 
-    const {acessToken , refreshToken} = await  generateAccessAndRefreshToken(user._id)
 
+    const {accessToken , refreshToken} = await  generateAccessAndRefreshToken(user._id)
+
+    
     const options = {
         httpOnly : true , 
         secure : true , 
     }
 
+    
 
 
     return res
     .status(200)
-    .cookies("accessToken" , acessToken , options)
-    .cookies("refreshToken" , refreshToken , options)
+    .cookie("accessToken" , accessToken , options)
+    .cookie("refreshToken" , refreshToken , options)
     .json(
         new ApiResponse(200 ,
             {
-                user : user , acessToken , refreshToken 
+                user : user , accessToken , refreshToken 
             } , 
             "User logged In Succesfully"
          )
     )
 })
 
+//logout
 const logOutUser = asyncHandler(async ( req , res) => {
     
+    await User.findByIdAndUpdate(
+        req.user._id ,{
+           $unset : {refreshToken : 1 } , 
+        } , 
+        {
+            new : true
+        }
+    )
 
+    const options = {
+        httpOnly : true , 
+        secure : true , 
+    }
+
+    return res 
+    .status(200)
+    .clearCookie("accessToken" , options)
+    .clearCookie("refreshToken" , options)
+    .json(
+       new ApiResponse(
+        200 , {}  ,"user logged out successfully"
+       ) 
+    )
+
+
+    
 })
 
-export { registerUser , loginUser}
+export { registerUser , loginUser , logOutUser}
