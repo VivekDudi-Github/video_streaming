@@ -2,6 +2,7 @@ import mongoose  , {Schema} from "mongoose";
 import jwt from 'jsonwebtoken'
 import bcrypt from "bcrypt"
 
+//pipelines on english channel 
 
 const user_Schema  = new Schema({  
     username : {
