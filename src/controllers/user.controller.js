@@ -18,7 +18,6 @@ const registerUser = asyncHandler( async(req , res) => {
 
     
  const {fullname , username , email , password}=req.body
-console.log(req.body);
 
 
     if (
@@ -75,7 +74,6 @@ console.log(req.body);
     if ( !avatar) {
         throw new ApiError(400 , "Please upload your avatar")
    }
-    console.log("uploaded");
     
     const user = await User.create({
         fullname , 
@@ -133,7 +131,6 @@ const loginUser = asyncHandler( async(req, res) => {
 
 //get email/username and password and validate them 
     
-
    const {email , username , password} = req.body
      if(!(username || email)){ 
         throw new ApiError(400 , "atleast username or email is required")
@@ -177,6 +174,8 @@ const loginUser = asyncHandler( async(req, res) => {
 //logout
 const logOutUser = asyncHandler(async ( req , res) => {
     
+    console.log(req.user);
+    
     await User.findByIdAndUpdate(
         req.user._id ,{
            $unset : {refreshToken : 1 } , 
@@ -211,49 +210,59 @@ const getCurrentUser = asyncHandler(async (req , res) => {
     .status(200)
     .json(
         new ApiResponse(
-            200 , req.user , "uesr fetched Succefully"
+            200 , req.user , "user fetched Successfully"
         )
     )
 })
 
 //update tokens
 const refreshAccessToken = asyncHandler(async (req , res) => {
-    const incomingrRefreshToken = req.cookies.refreshToken || req.body.refreshToken
-
-    if(!incomingrRefreshToken){
+    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
+    console.log(incomingRefreshToken);
+    
+    if(!incomingRefreshToken){
         throw new ApiError(401 , "Unauthorized Request");
     }
 try {
-    
         const decodedToken = jwt.verify(
-            incomingrRefreshToken  , 
-            process.env.REFRESH_TOKEN_SECRET
+            incomingRefreshToken  , 
+            process.env.ACESS_TOKEN_SECRET
         )
-    
+
         const user = await User.findById(decodedToken?._id)
     
         if(!user){
             throw new ApiError(401 , "invalid refresh token");
         }
+
+    console.log("Done !");
+    console.log("line:237" , user.refreshToken)
+    console.log( "line:238" , incomingRefreshToken)
     
-        if (user?.refreshToken !== incomingrRefreshToken) {
+
+        if (user?.refreshToken !== incomingRefreshToken) {
             throw new ApiError(401 , "Refresh token is expired or used")
         }
     
         const {refreshToken , accessToken} = await generateAccessAndRefreshToken(user._id)
-    
+        user.refreshToken = refreshToken 
+        await user.save({validateBeforeSave : false})
+
         return res
         .status(200)
-        .cookie("access token" , accessToken , options)
-        .cookie("refresh token", refreshToken , options)
+        .clearCookie(accessToken , options)
+        .clearCookie(refreshToken , options)
+        
+        .cookie("accessToken" , accessToken , options)
+        .cookie("refreshToken", refreshToken , options)
         .json(
             new ApiResponse(
-                200 , {accessToken , refreshAccessToken } , 
+                200 , {accessToken , refreshToken } , 
                 "Access Token Refreshed"
             )
         )
 } catch (error) {
-    throw new ApiError(400 , error?.message || " Invalid Refresh Token");
+    throw new ApiError(400 , ` ${error?.message}  Invalid Refresh Token `);
 
 }
 })
