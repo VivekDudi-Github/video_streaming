@@ -235,11 +235,6 @@ try {
             throw new ApiError(401 , "invalid refresh token");
         }
 
-    console.log("Done !");
-    console.log("line:237" , user.refreshToken)
-    console.log( "line:238" , incomingRefreshToken)
-    
-
         if (user?.refreshToken !== incomingRefreshToken) {
             throw new ApiError(401 , "Refresh token is expired or used")
         }
@@ -272,7 +267,7 @@ const changeUserPassword = asyncHandler(async (req , res) => {
     const {oldPassword , newPassword} = req.body
 
     if(oldPassword === newPassword){
-        throw new ApiError(400 , "This password is already active");
+        throw new ApiError(400 , "new password cannot be same");
     }
 
     const user = await User.findById(req.user._id)
@@ -299,8 +294,8 @@ const changeUserPassword = asyncHandler(async (req , res) => {
 const updateAccountDetails = asyncHandler(async (req , res) => {
     const {fullname , email } = req.body
 
-    if( !fullname || !email ){
-        throw ApiError(400 , "please provide credentials to change")
+    if( !(fullname || email) ){
+        throw new ApiError(400 , "please provide credentials to change")
     }
 
     await User.findByIdAndUpdate(
@@ -387,7 +382,6 @@ const updateCoverImage = asyncHandler(async ( req , res) => {
     )
 
 })
-
 
 
 //getting channel profile
