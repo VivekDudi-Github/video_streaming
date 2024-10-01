@@ -4,7 +4,7 @@ import bcrypt from "bcrypt"
 
 //pipelines on english channel 
 
-const user_Schema  = new Schema({  
+const userSchema  = new Schema({  
     username : {
         type : String , 
         required : true  , 
@@ -46,18 +46,18 @@ const user_Schema  = new Schema({
 } , {timestamps : true })
 
 
-user_Schema.pre('save' , async function (next) {
+userSchema.pre('save' , async function (next) {
     if( this.isModified('password')){
         this.password = await bcrypt.hash(this.password , 12)
         return next()
     }
 })
 
-user_Schema.methods.isPasswordCorrect = async function (password) {
+userSchema.methods.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password , this.password)
 }
 
-user_Schema.methods.generateAccessToken = function(){
+userSchema.methods.generateAccessToken = function(){
     return  jwt.sign(
         {
         _id : this.id , 
@@ -72,7 +72,7 @@ user_Schema.methods.generateAccessToken = function(){
 )
 }
 
-user_Schema.methods.generateRefreshToken = function(){
+userSchema.methods.generateRefreshToken = function(){
     return  jwt.sign(
         {
         _id : this.id , 
@@ -85,4 +85,4 @@ user_Schema.methods.generateRefreshToken = function(){
 }
 
 
-export const User = mongoose.model('user' , user_Schema)
+export const User = mongoose.model('user' , userSchema)

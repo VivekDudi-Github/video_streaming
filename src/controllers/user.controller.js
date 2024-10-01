@@ -6,12 +6,10 @@ import { uploadToCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-
 const options = {
     httpOnly : true , 
     secure : true , 
 }
-
 
 //signUP func
 const registerUser = asyncHandler( async(req , res) => {
@@ -39,47 +37,47 @@ const registerUser = asyncHandler( async(req , res) => {
     console.log('checked users');
     
     let avatar_localpath ;
-    // const coverimage_localpath = req.files?.coverImage[0]?.path 
-    console.log(req.files );
+    // // const coverimage_localpath = req.files?.coverImage[0]?.path 
+    // console.log(req.files );
     
 
-    if( req?.files && Array.isArray(req.files.avatar) && req?.files?.avatar?.length > 0 ){
-        avatar_localpath = req.files.avatar[0].path ; 
+    // if( req?.files && Array.isArray(req.files.avatar) && req?.files?.avatar?.length > 0 ){
+    //     avatar_localpath = req.files.avatar[0].path ; }
         
-    }else{
-        throw new ApiError(400 , "Avatar not found please check your files")
-    }
+    // }else{
+    //     throw new ApiError(400 , "Avatar not found please check your files")
+    // }
 
 
     let coverimage_localpath ;
-    let coverFileResponse ;
+    let coverFileResponse = '' ;
 
-    if( req?.files && req?.files?.coverImage?.length > 0 ){
-        coverFileResponse = null
-        coverimage_localpath = req.files.coverImage[0].path
+    // if( req?.files && req?.files?.coverImage?.length > 0 ){
+    //     coverFileResponse = null
+    //     coverimage_localpath = req.files.coverImage[0].path
 
-    }else{
-        coverFileResponse = "coverImage file wasn't uploaded "
-        coverimage_localpath = ''
-    }
+    // }else{
+    //     coverFileResponse = "coverImage file wasn't uploaded "
+    //     coverimage_localpath = ''
+    // }
     
-    if( !avatar_localpath){
-        throw new ApiError(400 , "Please upload your avatar")
-    }
+    // if( !avatar_localpath){
+    //     throw new ApiError(400 , "Please upload your avatar")
+    // }
 
     
-    const avatar = await uploadToCloudinary(avatar_localpath)
-    const coverImage = await uploadToCloudinary(coverimage_localpath)
+    const avatar = await uploadToCloudinary(avatar_localpath || "")
+    const coverImage = await uploadToCloudinary(coverimage_localpath || "")
  
-    if ( !avatar) {
-        throw new ApiError(400 , "Please upload your avatar")
-   }
+//     if ( !avatar) {
+//         throw new ApiError(400 , "Please upload your avatar")
+//    }
     
     const user = await User.create({
         fullname , 
         password ,
-        avatar : avatar.url  ,
-        coverImage : coverImage?.url || '' , 
+        avatar : avatar?.url  ?  avatar.url :  ''  ,
+        coverImage : coverImage?.url  ?  coverImage.url :  ''  , 
         email , 
         username : username.toLowerCase() , 
     })
@@ -126,7 +124,7 @@ const generateAccessAndRefreshToken = async(userId) => {
 }
 
 
-//login fun
+//login func
 const loginUser = asyncHandler( async(req, res) => {
 
 //get email/username and password and validate them 
@@ -519,7 +517,7 @@ const getWatchHistory = asyncHandler(async ( req, res ) => {
  
 
 
-export { registerUser ,
+export{ registerUser ,
         loginUser , 
         logOutUser ,
         refreshAccessToken ,
