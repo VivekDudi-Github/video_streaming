@@ -25,8 +25,8 @@ import subscriptionRouter from './routes/subscription.routes.js'
 
 //
 app.use("/api/v1/users" , userRouter)
-app.use("/api/v1/" , healthCheckRouter)
-app.use("/api/v1/" , subscriptionRouter)  
+app.use("/api/v1/healthcheck" , healthCheckRouter)
+app.use("/api/v1/subscriptions" , subscriptionRouter)  
 
 
 export {app}  
