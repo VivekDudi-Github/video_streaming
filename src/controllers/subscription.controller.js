@@ -1,4 +1,3 @@
-import mongoose, {isValidObjectId} from "mongoose"
 import {User} from "../models/user.model.js"
 import {ApiError} from "../utils/apiErrors.js"
 import {ApiResponse} from "../utils/apiRes.js"
@@ -7,10 +6,8 @@ import {Subscription} from "../models/subscriptions.model.js"
 
 
 const toggleSubscription = asyncHandler(async (req, res) => {
-    console.log("started")
-    // const {channelId} = req.params
 
-    try {
+    
         const {channelId} = req.body
         console.log(channelId)
         // TODO: toggle subscription
@@ -58,17 +55,13 @@ const toggleSubscription = asyncHandler(async (req, res) => {
                 )
             }
         }
-    } catch (error) {
-        throw new ApiError(400 , error?.message || "error in subscribing func ");
-        
-    }
+    
 
 })
 
 // controller to return subscriber list of a channel
 const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 
-        console.log("started")
         const {channelId} = req.body
     
         if( !channelId){
@@ -90,6 +83,18 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
 const getSubscribedChannels = asyncHandler(async (req, res) => {
     const { subscriberId } = req.body
 
+    if(!subscriberId){
+        throw new ApiError(400 , "please provide a subscriberId");
+    }
+    const subscriptionCount = await Subscription.countDocuments({subscriber : subscriberId})
+
+    if(subscriptionCount ||  subscriptionCount === 0){
+        return res.status(200).json(
+            new ApiResponse(200 ,subscriptionCount , "subscriptions count fetched successfully")
+        )
+    }else{
+        throw new ApiError(500 , "Error occured while fetching the subs count");
+    }
     
 })
 

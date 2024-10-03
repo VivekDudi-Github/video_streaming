@@ -1,7 +1,6 @@
 import {v2 as cloudinary} from 'cloudinary' ;
 import fs from 'fs' ;
-
-//how does unlinking deletes in file system 
+ 
 
 cloudinary.config({ 
     cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 

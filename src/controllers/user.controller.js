@@ -101,7 +101,6 @@ const registerUser = asyncHandler( async(req , res) => {
 
 })
 
-
 //generate tokens
 const generateAccessAndRefreshToken = async(userId) => {
     try {
@@ -122,7 +121,6 @@ const generateAccessAndRefreshToken = async(userId) => {
         
     }
 }
-
 
 //login func
 const loginUser = asyncHandler( async(req, res) => {
@@ -381,19 +379,21 @@ const updateCoverImage = asyncHandler(async ( req , res) => {
 
 })
 
-
 //getting channel profile
 const getUserChannelProfile = asyncHandler( async (req , res) => {
-    const username = req.params
+    console.log("getUserChannelProfile started..");
+    
+    const username = req.params.username ;
 
-    if(!username?.trim()){
+
+    if(!username.trim()){
         new ApiError(400 , "username is missing in params")
     }
 
     const channel = await User.aggregate([
         {
             $match : {
-                username : username?.toLowerCase()
+                username : username.toLowerCase()
             }
         } ,
         {
@@ -412,19 +412,19 @@ const getUserChannelProfile = asyncHandler( async (req , res) => {
                 as : "SubscribedTo"
             }
         } , 
-        {
+        {   
             $addFields : {
                 subscriberCount : {
-                   $size : "$subscribers"
+                   $count : "$subscribers"
                 } , 
                 channelSubscribedToCount : {
-                    $size : "$SubscribedTo"
+                    $count : "$SubscribedTo"
                 } , 
                 isSubscribed : {
-                    $condition : {
-                        if : { $in : [ req.user?._id , "$subscribers.subscriber"] } , 
+                    $cond : {
+                        if : {  $in : [ req.user?._id , "$subscribers.subscriber"] } , 
                         then : true , 
-                        else : false ,
+                        else : false , 
                         }
                 }
             }
@@ -457,7 +457,6 @@ const getUserChannelProfile = asyncHandler( async (req , res) => {
     )
 
 })
-
 
 //get watch history 
 const getWatchHistory = asyncHandler(async ( req, res ) => {
