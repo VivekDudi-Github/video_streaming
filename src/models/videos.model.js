@@ -4,7 +4,7 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 const videoSchema  = new Schema({  
     videofile : { 
-        type : true , 
+        type : String , 
         required : [true , 'Please upload a valid file for upload'] ,
     } , 
     thumbnail : {
@@ -27,9 +27,9 @@ const videoSchema  = new Schema({
         default : 0 ,
     } , 
     isPublished : {
-        type : boolean ,
+        type : Boolean ,
         required : true , 
-        default : ture ,
+        default : true ,
     } , 
     owner : {
         type : Schema.Types.ObjectId , 
@@ -41,4 +41,4 @@ const videoSchema  = new Schema({
 videoSchema.plugin(mongooseAggregatePaginate)
 
 
-export const videos = mongoose.model('videos' , videoSchema)
+export const Videos = mongoose.model('videos' , videoSchema)
