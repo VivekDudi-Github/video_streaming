@@ -122,7 +122,6 @@ const generateAccessAndRefreshToken = async(userId) => {
     }
 }
 
-
 //login func
 const loginUser = asyncHandler( async(req, res) => {
 

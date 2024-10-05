@@ -4,10 +4,19 @@ import {ApiResponse} from "../utils/apiRes.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {Subscription} from "../models/subscriptions.model.js"
 
-// controller to toggele subscription 
+
 const toggleSubscription = asyncHandler(async (req, res) => {
+
+    
         const {channelId} = req.body
-        console.log(channelId) 
+        console.log(channelId)
+        // TODO: toggle subscription
+    
+        //check for channel params 
+        //check for channel id and userId 
+        //check for channel already subscribed or not 
+        //create a new doc with both sub and subscriber
+    
         
         if( !channelId){
             throw new ApiError(400 , "bad request : please provide a channel id")
