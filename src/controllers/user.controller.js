@@ -13,6 +13,7 @@ const options = {
 
 //signUP func
 const registerUser = asyncHandler( async(req , res) => {
+console.log(req.files);
 
     
  const {fullname , username , email , password}=req.body
