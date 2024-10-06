@@ -3,9 +3,9 @@ import mongooseAggregatePaginate from "mongoose-aggregate-paginate-v2";
 
 
 const videoSchema  = new Schema({  
-    videofile : { 
+    videoFile : { 
         type : String , 
-        required : [true , 'Please upload a valid file for upload'] ,
+        required : true,
     } , 
     thumbnail : {
         type : String  , 
