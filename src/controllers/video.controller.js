@@ -4,14 +4,13 @@ import {User} from "../models/user.model.js"
 import {ApiError} from "../utils/apiErrors.js"
 import {ApiResponse} from "../utils/apiRes.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
-import {uploadToCloudinary} from "../utils/cloudinary.js"
+import {uploadToCloudinary , deleteOnCloudinary } from "../utils/cloudinary.js"
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
 })
-
 
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -105,6 +104,35 @@ const updateVideo = asyncHandler(async (req, res) => {
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params
     //TODO: delete video
+    if(!videoId){
+        throw new ApiError(400 , "VideoId is missing from params");
+    }
+    const videoRef = await Videos.findById(videoId)
+
+    if(!videoRef){
+        throw new ApiError(400 , "couldn't find any doc with the videoId ")
+    }
+
+    const public_id = videoRef.videoFile.split("/").pop().split(".").shift()
+    
+    const response = await deleteOnCloudinary(public_id.trim() , "image")
+
+
+    if(response.result === "ok"){
+        try {
+           await Videos.deleteOne({_id : videoId})
+        } catch (error) {
+            throw new ApiError (500 , "something went wrong while deleting the doc" ,error )
+        }
+
+        return res.status(200).json(
+            new ApiResponse(200 , "File successfully deleted")
+        )
+
+    }else{
+        throw new ApiError(400 , response?.result || "something went wrong while deleting")
+    }
+    
 })
 
 

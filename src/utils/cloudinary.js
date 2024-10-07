@@ -1,5 +1,6 @@
 import {v2 as cloudinary} from 'cloudinary' ;
 import fs from 'fs' ;
+import { ApiError } from './apiErrors.js';
  
 
 cloudinary.config({ 
@@ -28,19 +29,25 @@ const uploadToCloudinary = async (localFilePath) => {
     }
 }
 
-const deleteToCloudinary = async(public_id) => {
+const deleteOnCloudinary = async(public_id , type) => {
    try {
      if(!public_id) {
         console.log(public_id , "public not found")
         return null }
  
-     const response = await  cloudinary.uploader.destroy(public_id , {resource_type : "image"})
-     console.log("File deleted succesfully " , response)
+    const res = await cloudinary.uploader.destroy(public_id , {resource_type: type})
+    .then((result)=> {
+        if(result){
+            console.log("line:41" , result);
+            return result
+        }
+    })
+    return res 
+
    } catch (error) {
     console.log("error while deleting the file" , error)
    }
-
 }
 
-export { uploadToCloudinary , deleteToCloudinary }
+export { uploadToCloudinary , deleteOnCloudinary }
 
