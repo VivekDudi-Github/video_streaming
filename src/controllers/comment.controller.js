@@ -22,9 +22,11 @@ const addComment = asyncHandler(async (req, res) => {
     if( !context || !videoId ){
         throw new ApiError(400 , "context and videoId is missing")
     }
-    console.log(context , videoId);
+    if (context.length > 200) {
+        throw new Error(400 , "context length is higher than limit");
+    }
     
-    
+
     try {
         const doc = await Comment.create({
             video : videoId , 
@@ -48,10 +50,51 @@ const addComment = asyncHandler(async (req, res) => {
 
 const updateComment = asyncHandler(async (req, res) => {
     // TODO: update a comment
+    const { context } = req.body
+    const {commentId} = req.params
+
+    if(!commentId || !context){
+        throw new ApiError(400 , " context is missing");
+    }
+    console.log(context);
+    
+    if(context.length > 200 ){
+        throw new ApiError(400 , "context length is longer thaan the limit");
+    }
+
+    const comment = await Comment.findOneAndUpdate( {_id : commentId }, {context : context} , {new : true})
+    
+    if (!comment) {
+        throw new ApiError(500 , `Error while updating the comment `);  
+    }
+    
+    return res.status(200).json(
+        new ApiResponse(200 , comment , "comment created")
+    )
+    
+
 })
 
 const deleteComment = asyncHandler(async (req, res) => {
-    // TODO: delete a comment
+    const {commentId} = req.params
+    if(!commentId ){
+        throw new ApiError(400 , "comment id is missing");
+    }
+
+    try {
+        const doc = await Comment.findByIdAndDelete(commentId)
+        if(!doc){
+            throw new ApiError(400 , "comment id is not correct");
+        }
+        
+        return res.status(200).json(
+            new ApiResponse(200 ,doc , "deleted comment")
+        )
+
+    } catch (error) {
+        throw new ApiError(500 , error || "error in deleting");
+    }
+
 })
 
 export {
