@@ -14,23 +14,24 @@ const getChannelStats = asyncHandler(async (req, res) => {
 const getChannelVideos = asyncHandler(async (req, res) => {
     // TODO: Get all the videos uploaded by the channel
     const {userId} = req.params
-    const {page , pagesize , sort} = req.body
+    const {page , pagesize} = req.body
     
     if (!userId ) {
         throw new ApiError(400 , "userid is missing")
     }
 
-    if (!page || !pagesize || !sort) {
+    if (!page || !pagesize ) {
         throw new ApiError(400 , "required json.params are missing")
     }
     const limit = pagesize ;
-    const skip = page-1 * pagesize ;
+    const skip = (page-1) * pagesize 
+    
 
-    //sort : Sets the sort order. If an object is passed, values allowed are asc, desc, ascending, descending, 1, and -1.
-    const videosDocs = await Videos.find({owner : userId})
+    const videosDocs = await Videos.find({owner : userId} )
                                         .skip(skip)
                                         .limit(limit)
-                                        .sort(sort)
+                                        .sort({createdAt : -1})
+                                        .select(" createdAt _id title thumbnail videoFile duration ")
     
     if (videosDocs.length < 1) {
         throw new ApiError(500 , "no videos were found");

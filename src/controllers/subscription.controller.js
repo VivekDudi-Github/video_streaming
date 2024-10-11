@@ -26,7 +26,6 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         if (!channel) {
             throw new ApiError(400 , "channel not found")
         }
-        console.log("line:32" , channel);
         
        
         const doc = await Subscription.findOne( {$and : [{channel : channelId} , {subscriber : userId}]})    
