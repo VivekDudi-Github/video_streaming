@@ -22,4 +22,4 @@ const like_schmea = new  Schema(
     {timestamps : true }
 ) 
 
-export const like = mongoose.model("like" , like_schmea)
+export const Like = mongoose.model("like" , like_schmea)

@@ -34,7 +34,7 @@ const toggleSubscription = asyncHandler(async (req, res) => {
                 console.log(doc);
             
             const delResponse = await Subscription.deleteOne({_id : doc._id})
-            if(delResponse.acknowledged == true){
+            if(delResponse.deletedCount == 1){
                 return res.status(200).json(
                     new ApiResponse(200 , "Unsubscribed successfully")
                 )
