@@ -11,7 +11,7 @@ const options = {
     secure : true , 
 }
 
-//signUP func
+//register func
 const registerUser = asyncHandler( async(req , res) => {
 console.log(req.files);
 

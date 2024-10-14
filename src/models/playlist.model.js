@@ -12,8 +12,7 @@ const playlist_schema = new Schema ({
     } , 
     video : [{
         type : Schema.Types.ObjectId  ,
-        ref : "video" ,  
-        required : true , 
+        ref : "video" ,   
     }] , 
     owner : {
         type : Schema.Types.ObjectId , 
@@ -26,4 +25,4 @@ const playlist_schema = new Schema ({
 
 playlist_schema.plugin(mongooseAggregatePaginate)
 
-export const playlist = mongoose.model("playlist" , playlist_schema)
+export const Playlist = mongoose.model("playlist" , playlist_schema)

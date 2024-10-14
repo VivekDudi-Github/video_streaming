@@ -1,4 +1,3 @@
-import mongoose, {isValidObjectId} from "mongoose"
 import {Like} from "../models/like.model.js"
 import {ApiError} from "../utils/apiErrors.js"
 import {ApiResponse} from "../utils/apiRes.js"
@@ -176,4 +175,4 @@ export {
     toggleTweetLike,
     toggleVideoLike,
     getLikedVideos
-}
+} 
