@@ -84,7 +84,7 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     }
     
     const updatedPlaylist = await Playlist.findByIdAndUpdate(playlistId , {
-        video : videoId
+        $addToSet : { video : videoId}
     } , {new : true})
 
     if(!updatedPlaylist){
@@ -97,19 +97,80 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
 
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const {playlistId, videoId} = req.params
-    // TODO: remove video from playlist
 
+    if (!playlistId || !videoId) {
+        throw new ApiError(400 , "all params are required (playlistId , videoId)");
+    }
+
+    const videoRef = await Videos.exists({_id : videoId})
+    if(!videoRef){
+        throw new ApiError(400 , "provided videoId is wrong")
+    }
+    const PlaylistRef = await Playlist.exists({_id : playlistId})
+    if(!PlaylistRef){
+        throw new ApiError(400 , "provided PlaylistId is wrong")
+    }
+    
+    const updatedPlaylist = await Playlist.findByIdAndUpdate(playlistId , {
+        $pull : { video : videoId}
+    } , {new : true})
+
+    if(!updatedPlaylist){
+        throw new ApiError(500 , "error while adding the video to the playlist")
+    }
+    return res.status(200).json(
+        new ApiResponse(200 , updatePlaylist , "playlist updated !")
+    )
 })
 
 const deletePlaylist = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
-    // TODO: delete playlist
+    if (!playlistId ) {
+        throw new ApiError(400 , "all params are required (playlistId )");
+    }
+
+    const deletedPlaylist = await Playlist.findByIdAndDelete(playlistId) ; 
+
+    if (!deletedPlaylist) {
+        throw new ApiError(500 , "error while deleting the playlist (might be the Id is wrong)")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , deletedPlaylist)
+    )
 })
 
 const updatePlaylist = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
     const {name, description} = req.body
     //TODO: update playlist
+    if (!playlistId ) {
+        throw new ApiError(400 , "all params are required (playlistId )");
+    }
+    if (!name || !description) {
+        throw new ApiError(400 , "all body feilds are required (description , name)");
+    }
+
+    const IsPlaylistexist = await Playlist.exists({_id : playlistId}) 
+    
+    if(!IsPlaylistexist){
+        throw new ApiError(400 , "No playlist found")
+    }
+    
+    const newPlaylist = await Playlist.findByIdAndUpdate(playlistId , {
+        name : name , 
+        description : description 
+    })
+
+    if(!newPlaylist){
+        throw new ApiError(500 , "there was error while updating the playlist")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , newPlaylist , "Updated Successfully!")
+    )
+
+
 })
 
 export {
