@@ -90,11 +90,14 @@ const addVideoToPlaylist = asyncHandler(async (req, res) => {
     if(!updatedPlaylist){
         throw new ApiError(500 , "error while adding the video to the playlist")
     }
+    console.log(updatedPlaylist);
+    
     return res.status(200).json(
-        new ApiResponse(200 , updatePlaylist , "playlist updated !")
+        new ApiResponse(200 , updatedPlaylist , "playlist updated !")
     )
 })
 
+//
 const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     const {playlistId, videoId} = req.params
 
@@ -110,16 +113,20 @@ const removeVideoFromPlaylist = asyncHandler(async (req, res) => {
     if(!PlaylistRef){
         throw new ApiError(400 , "provided PlaylistId is wrong")
     }
+
+    console.log("line:117")
+    console.log(videoId , playlistId);
+    
     
     const updatedPlaylist = await Playlist.findByIdAndUpdate(playlistId , {
-        $pull : { video : videoId}
-    } , {new : true})
+        $pull : { video : videoId }
+    } , {new : true} )
 
     if(!updatedPlaylist){
         throw new ApiError(500 , "error while adding the video to the playlist")
     }
     return res.status(200).json(
-        new ApiResponse(200 , updatePlaylist , "playlist updated !")
+        new ApiResponse(200 , updatedPlaylist , "playlist updated !")
     )
 })
 
@@ -132,7 +139,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
     const deletedPlaylist = await Playlist.findByIdAndDelete(playlistId) ; 
 
     if (!deletedPlaylist) {
-        throw new ApiError(500 , "error while deleting the playlist (might be the Id is wrong)")
+        throw new ApiError(500 , "error while deleting the playlist (Id can be wrong)")
     }
 
     return res.status(200).json(
@@ -143,7 +150,7 @@ const deletePlaylist = asyncHandler(async (req, res) => {
 const updatePlaylist = asyncHandler(async (req, res) => {
     const {playlistId} = req.params
     const {name, description} = req.body
-    //TODO: update playlist
+   
     if (!playlistId ) {
         throw new ApiError(400 , "all params are required (playlistId )");
     }
@@ -160,7 +167,7 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     const newPlaylist = await Playlist.findByIdAndUpdate(playlistId , {
         name : name , 
         description : description 
-    })
+    } , {new : true})
 
     if(!newPlaylist){
         throw new ApiError(500 , "there was error while updating the playlist")
@@ -169,8 +176,6 @@ const updatePlaylist = asyncHandler(async (req, res) => {
     return res.status(200).json(
         new ApiResponse(200 , newPlaylist , "Updated Successfully!")
     )
-
-
 })
 
 export {
