@@ -8,22 +8,36 @@ import {uploadToCloudinary , deleteOnCloudinary } from "../utils/cloudinary.js"
 
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 5, query,   sortType, userId } = req.query
+    const { page = 1, limit = 5, query, sortBy = 'createdAt' ,  sortType = 'asc', userId } = req.query
     //TODO: get all videos based on query, sort, pagination
-    
-    console.log(page , limit , query , sortBy , sortType , userId );
-    if(!userId){
-        throw new ApiError(400 , "userId is missing");
+   
+    if(!query && !userId){
+        throw new ApiError(400 , "Both query and userId not found");
     }
+
+    const filter = {} ;
+
+    if(userId){
+        filter._id = userId
+    }
+
+    if(query){
+        filter.$or = [{
+            title : { $regex : query , $options : 'i' } , 
+            description : { $regex : query , $options : 'i' }
+        }]
+    }
+    
+    const sortOptions = {} ;
+    sortOptions[sortBy] = sortType === 'desc' ? -1 : 1 ;
 
     
     const skip = (page -1) * limit
 
-    await User.find()
+    await User.find(filter) 
     .skip(skip)
     .limit(limit)
     .sort({sortBy , sortType })
-    .setQuery(query)
 })
 
 

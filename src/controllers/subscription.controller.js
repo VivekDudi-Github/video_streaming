@@ -6,16 +6,7 @@ import {Subscription} from "../models/subscriptions.model.js"
 
 
 const toggleSubscription = asyncHandler(async (req, res) => {
-
-    
         const {channelId} = req.body
-        console.log(channelId)
-        // TODO: toggle subscription
-    
-        //check for channel params 
-        //check for channel id and userId 
-        //check for channel already subscribed or not 
-        //create a new doc with both sub and subscriber
     
         
         if( !channelId){
