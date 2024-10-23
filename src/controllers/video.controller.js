@@ -1,15 +1,14 @@
-import mongoose, {isValidObjectId} from "mongoose"
 import {Videos} from "../models/videos.model.js"
-import {User} from "../models/user.model.js"
 import {ApiError} from "../utils/apiErrors.js"
 import {ApiResponse} from "../utils/apiRes.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
 import {uploadToCloudinary , deleteOnCloudinary } from "../utils/cloudinary.js"
 
-
+// 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const { page = 1, limit = 5, query, sortBy = 'createdAt' ,  sortType = 'asc', userId } = req.query
+    const { page = 1, limit = 3, query, sortBy  ,  sortType = 'asc', userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+   
    
     if(!query && !userId){
         throw new ApiError(400 , "Both query and userId not found");
@@ -22,10 +21,10 @@ const getAllVideos = asyncHandler(async (req, res) => {
     }
 
     if(query){
-        filter.$or = [{
-            title : { $regex : query , $options : 'i' } , 
-            description : { $regex : query , $options : 'i' }
-        }]
+        filter.$or = [
+           { title : { $regex : query , $options : 'i' } } ,
+           { description : { $regex : query , $options : 'i' } }
+        ]
     }
     
     const sortOptions = {} ;
@@ -34,10 +33,20 @@ const getAllVideos = asyncHandler(async (req, res) => {
     
     const skip = (page -1) * limit
 
-    await User.find(filter) 
+    const FoundVideos = await Videos.find(filter) 
     .skip(skip)
     .limit(limit)
-    .sort({sortBy , sortType })
+    .sort(sortOptions)
+    
+
+    if(FoundVideos.length < 1){
+        throw new ApiError(400 , "no videos were found")
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200 , FoundVideos , "fetcehd successfully" )
+    )
+
 })
 
 
