@@ -7,11 +7,29 @@ import {asyncHandler} from "../utils/asyncHandler.js"
 const getVideoComments = asyncHandler(async (req, res) => {
     //TODO: get all comments for a video
     const {videoId} = req.params
-    const {page = 1, limit = 10} = req.query
+    const {page = 1, limit = 10 , sortBy = 'desc'} = req.query
 
+    const skip = (page- 1) * limit
+    const sort = sortBy == "desc" ? -1  : 1
+    console.log(sort);
+    
     if(!videoId){
-        
+        throw new ApiError(400 , "videoId missing")
     }
+    
+    const comments = await Comment.find({video : videoId})
+    .limit(limit)
+    .skip(skip)
+    .sort({ createdAt : sort })
+    console.log(comments);
+    
+
+    if(!comments.length > 0){
+        throw new ApiError(500 , "no comments found")
+    }
+    return res.status(200).json(
+        new ApiResponse(200 , comments , "comments fetched successfully")
+    )
 
 })
 
