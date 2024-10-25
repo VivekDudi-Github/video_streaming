@@ -10,8 +10,7 @@ const getVideoComments = asyncHandler(async (req, res) => {
     const {page = 1, limit = 10 , sortBy = 'desc'} = req.query
 
     const skip = (page- 1) * limit
-    const sort = sortBy == "desc" ? -1  : 1
-    console.log(sort);
+    const sort = sortBy == "desc" ? -1  : 1 ;
     
     if(!videoId){
         throw new ApiError(400 , "videoId missing")

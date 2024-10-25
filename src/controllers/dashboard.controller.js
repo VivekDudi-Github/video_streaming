@@ -1,14 +1,79 @@
 import mongoose from "mongoose"
 import {Videos} from "../models/videos.model.js"
 import {Subscription} from "../models/subscriptions.model.js"
-// import {Like} from "../models/like.model.js"
 import {ApiError} from "../utils/apiErrors.js"
 import {ApiResponse} from "../utils/apiRes.js"
 import {asyncHandler} from "../utils/asyncHandler.js"
-import { Comment } from "../models/comment.model.js"
+import { User } from "../models/user.model.js"
 
 const getChannelStats = asyncHandler(async (req, res) => {
      // TODO: Get the channel stats like total video views, total subscribers, total videos, total likes etc.
+    
+    const {userId} = req.params ;
+    const fullname  = 'five'
+
+    const user = await User.aggregate([
+
+            {
+                $match : {
+                _id : new mongoose.Types.ObjectId(userId)
+            }
+        } ,
+    //like
+                {
+                    $lookup : {
+                    from : "videos" , 
+                    localField :"_id" , 
+                    foreignField :  "owner",
+                    as : "allVideos" ,         
+                }
+            },
+            {
+                $addFields : {
+                    videoIds : {
+                        $map : {
+                            input : "$allVideos" , 
+                            as : "video" , 
+                            in : "$$video._id"
+                        }
+                    }
+                }
+            } ,
+                {
+                    $lookup : {
+                    from : "likes" , 
+                    foreignField : "video"  , 
+                    localField : "videoIds" , 
+                    as : "likedVideo" , 
+                }
+            }  , 
+                {
+                    $addFields : {
+                    totalVideos : {
+                        $size : "$allVideos"
+                    } , 
+                    totalLikedVideos : {
+                        $size : "$likedVideo"
+                    }
+                }
+            } , 
+                {
+                    $project : {
+                    fullName: 1,
+                    username: 1,
+                    totalVideos : 1 ,
+                    totalLikedVideos : 1 , 
+                }
+            }
+        
+    ]) 
+    console.log(user);
+
+    return res.status(200).json(
+        new ApiResponse(200 , user , "fecthed successfully")
+    )
+    
+
 })
 
 const getChannelVideos = asyncHandler(async (req, res) => {
