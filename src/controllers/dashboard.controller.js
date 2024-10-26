@@ -18,8 +18,14 @@ const getChannelStats = asyncHandler(async (req, res) => {
                 $match : {
                 _id : new mongoose.Types.ObjectId(userId)
             }
-        } ,
-    //like
+        } ,     {
+                $lookup : {
+                    from : "subscriptions" , 
+                    foreignField : "channel" , 
+                    localField : "_id" ,
+                    as : "subscribers" 
+                }
+            } ,
                 {
                     $lookup : {
                     from : "videos" , 
@@ -30,11 +36,23 @@ const getChannelStats = asyncHandler(async (req, res) => {
             },
             {
                 $addFields : {
+                    totalSubscribers : {
+                        $size : "$subscribers"
+                    } , 
                     videoIds : {
                         $map : {
                             input : "$allVideos" , 
                             as : "video" , 
                             in : "$$video._id"
+                        }
+                    } , 
+                    totalViews : {
+                        $sum : {
+                            $map : {
+                                input : "$allVideos" , 
+                                as : "video" , 
+                                in :  "$$video.views"
+                            }
                         }
                     }
                 }
@@ -63,6 +81,8 @@ const getChannelStats = asyncHandler(async (req, res) => {
                     username: 1,
                     totalVideos : 1 ,
                     totalLikedVideos : 1 , 
+                    totalViews : 1 , 
+                    totalSubscribers : 1 , 
                 }
             }
         
